@@ -1,0 +1,186 @@
+/* ==========================================================================
+   Design System Variables - Memorable Platform
+   Follows Material Design 3.0 principles with enhanced accessibility
+   Version: 1.0.0
+   ========================================================================== */
+
+/* Base Theme Variables
+   ========================================================================== */
+:root {
+  /* Color System - Primary
+     ============================== */
+  --color-primary: #6200ee;
+  --color-primary-variant: #3700b3;
+  --color-secondary: #03dac6;
+  --color-secondary-variant: #018786;
+
+  /* Color System - Surface
+     ============================== */
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-variant: #f5f5f5;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Color System - Feedback
+     ============================== */
+  --color-error: #b00020;
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-info: #2196f3;
+  --color-focus-ring: #1a73e8;
+
+  /* Color System - Text
+     ============================== */
+  --color-text-primary: rgba(0, 0, 0, 0.87);
+  --color-text-secondary: rgba(0, 0, 0, 0.6);
+  --color-text-disabled: rgba(0, 0, 0, 0.38);
+  --color-text-on-primary: #ffffff;
+  --color-text-on-secondary: #000000;
+
+  /* Color System - Interactive
+     ============================== */
+  --color-interactive-hover: rgba(0, 0, 0, 0.04);
+  --color-interactive-active: rgba(0, 0, 0, 0.08);
+  --color-interactive-selected: rgba(0, 0, 0, 0.12);
+  --color-interactive-disabled: rgba(0, 0, 0, 0.12);
+
+  /* Typography - Font Families
+     ============================== */
+  --font-family-primary: 'Roboto', sans-serif;
+  --font-family-secondary: 'Playfair Display', serif;
+
+  /* Typography - Font Sizes
+     ============================== */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-md: 1rem;       /* 16px */
+  --font-size-lg: 1.25rem;    /* 20px */
+  --font-size-xl: 1.5rem;     /* 24px */
+  --font-size-2xl: 2rem;      /* 32px */
+
+  /* Typography - Headings
+     ============================== */
+  --font-size-h1: 2.5rem;     /* 40px */
+  --font-size-h2: 2rem;       /* 32px */
+  --font-size-h3: 1.75rem;    /* 28px */
+  --font-size-h4: 1.5rem;     /* 24px */
+  --font-size-h5: 1.25rem;    /* 20px */
+  --font-size-h6: 1rem;       /* 16px */
+
+  /* Typography - Letter Spacing
+     ============================== */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+
+  /* Typography - Font Weights
+     ============================== */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Typography - Line Heights
+     ============================== */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Spacing System - Base
+     ============================== */
+  --spacing-xs: 0.25rem;      /* 4px */
+  --spacing-sm: 0.5rem;       /* 8px */
+  --spacing-md: 1rem;         /* 16px */
+  --spacing-lg: 1.5rem;       /* 24px */
+  --spacing-xl: 2rem;         /* 32px */
+  --spacing-2xl: 3rem;        /* 48px */
+
+  /* Spacing System - Components
+     ============================== */
+  --spacing-component-xs: 0.5rem;
+  --spacing-component-sm: 0.75rem;
+  --spacing-component-md: 1.25rem;
+  --spacing-component-lg: 2rem;
+
+  /* Border Radius
+     ============================== */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 1rem;
+  --border-radius-full: 9999px;
+
+  /* Shadows
+     ============================== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-overlay: 0 8px 16px rgba(0, 0, 0, 0.12);
+
+  /* Transitions
+     ============================== */
+  --transition-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-easing-decelerate: cubic-bezier(0.0, 0, 0.2, 1);
+  --transition-easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  
+  --transition-duration-fast: 150ms;
+  --transition-duration-normal: 300ms;
+  --transition-duration-slow: 500ms;
+
+  /* Transform Origins
+     ============================== */
+  --transform-origin-center: center;
+  --transform-origin-top: top;
+  --transform-origin-bottom: bottom;
+
+  /* Breakpoints
+     ============================== */
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 768px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1440px;
+
+  /* Z-Index Scale
+     ============================== */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal: 1040;
+  --z-index-popover: 1050;
+  --z-index-tooltip: 1060;
+}
+
+/* Dark Theme Variables
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Color System - Surface
+       ============================== */
+    --color-background: #121212;
+    --color-surface: #1e1e1e;
+    --color-surface-variant: #2c2c2c;
+    --color-overlay: rgba(255, 255, 255, 0.08);
+
+    /* Color System - Text
+       ============================== */
+    --color-text-primary: rgba(255, 255, 255, 0.87);
+    --color-text-secondary: rgba(255, 255, 255, 0.6);
+    --color-text-disabled: rgba(255, 255, 255, 0.38);
+
+    /* Color System - Interactive
+       ============================== */
+    --color-interactive-hover: rgba(255, 255, 255, 0.04);
+    --color-interactive-active: rgba(255, 255, 255, 0.08);
+    --color-interactive-selected: rgba(255, 255, 255, 0.12);
+    --color-interactive-disabled: rgba(255, 255, 255, 0.12);
+
+    /* Color System - Focus
+       ============================== */
+    --color-focus-ring: #90caf9;
+
+    /* Shadows
+       ============================== */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    --shadow-overlay: 0 8px 16px rgba(0, 0, 0, 0.32);
+  }
+}
