@@ -1,0 +1,222 @@
+version: '3.8'
+
+services:
+  # API Gateway Service
+  gateway:
+    build:
+      context: ../../src/backend/services/gateway
+      dockerfile: Dockerfile
+      target: development
+    container_name: memorable_gateway_dev
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DEBUG_PORT=9229
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth:3001
+      - BOOK_SERVICE_URL=http://book:3002
+      - AI_SERVICE_URL=http://ai:8000
+    ports:
+      - "3000:3000"  # API port
+      - "9229:9229"  # Debug port
+    volumes:
+      - ../../src/backend/services/gateway:/app
+      - gateway_node_modules:/app/node_modules
+    command: npm run dev
+    depends_on:
+      - redis
+      - auth
+      - book
+      - ai
+    networks:
+      - memorable_dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Authentication Service
+  auth:
+    build:
+      context: ../../src/backend/services/auth
+      dockerfile: Dockerfile
+      target: development
+    container_name: memorable_auth_dev
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DEBUG_PORT=9230
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgres://postgres:postgres@postgres:5432/memorable_auth
+    ports:
+      - "3001:3001"  # Service port
+      - "9230:9230"  # Debug port
+    volumes:
+      - ../../src/backend/services/auth:/app
+      - auth_node_modules:/app/node_modules
+    command: npm run dev
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - memorable_dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Book Service
+  book:
+    build:
+      context: ../../src/backend/services/book
+      dockerfile: Dockerfile
+      target: development
+    container_name: memorable_book_dev
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DEBUG_PORT=9231
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgres://postgres:postgres@postgres:5432/memorable_book
+    ports:
+      - "3002:3002"  # Service port
+      - "9231:9231"  # Debug port
+    volumes:
+      - ../../src/backend/services/book:/app
+      - book_node_modules:/app/node_modules
+    command: npm run dev
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - memorable_dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # AI Service
+  ai:
+    build:
+      context: ../../src/backend/services/ai
+      dockerfile: Dockerfile
+      target: development
+    container_name: memorable_ai_dev
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=8000
+      - DEBUG_PORT=5678
+      - WORKERS=1
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8000:8000"  # Service port
+      - "5678:5678"  # Debug port
+    volumes:
+      - ../../src/backend/services/ai:/app
+      - ai_models:/app/models
+      - ai_cache:/app/cache
+    command: python -m debugpy --listen 0.0.0.0:5678 -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - redis
+    networks:
+      - memorable_dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Frontend Web Application
+  web:
+    build:
+      context: ../../src/web
+      dockerfile: Dockerfile
+      target: development
+    container_name: memorable_web_dev
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
+      - VITE_HMR_PORT=24678
+    ports:
+      - "5173:5173"    # Vite dev server
+      - "24678:24678"  # HMR port
+    volumes:
+      - ../../src/web:/app
+      - web_node_modules:/app/node_modules
+    command: npm run dev
+    depends_on:
+      - gateway
+    networks:
+      - memorable_dev
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: memorable_postgres_dev
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_MULTIPLE_DATABASES=memorable_auth,memorable_book
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - memorable_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: memorable_redis_dev
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - memorable_dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  memorable_dev:
+    driver: bridge
+    name: memorable_dev
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+
+volumes:
+  postgres_data:
+    name: memorable_postgres_dev_data
+  redis_data:
+    name: memorable_redis_dev_data
+  ai_models:
+    name: memorable_ai_models_dev
+  ai_cache:
+    name: memorable_ai_cache_dev
+  gateway_node_modules:
+    name: memorable_gateway_node_modules_dev
+  auth_node_modules:
+    name: memorable_auth_node_modules_dev
+  book_node_modules:
+    name: memorable_book_node_modules_dev
+  web_node_modules:
+    name: memorable_web_node_modules_dev
