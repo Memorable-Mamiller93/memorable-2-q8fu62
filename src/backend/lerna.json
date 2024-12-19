@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "npmClient": "pnpm",
+  "useWorkspaces": true,
+  "packages": ["services/*"],
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish %s",
+      "registry": "https://registry.npmjs.org/",
+      "allowBranch": ["main", "develop"],
+      "yes": true,
+      "ignoreChanges": [
+        "**/*.md",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/test/**"
+      ]
+    },
+    "version": {
+      "conventionalCommits": true,
+      "message": "chore(release): version %s",
+      "createRelease": "github",
+      "yes": true,
+      "exact": true,
+      "changelogPreset": "conventional-changelog-conventionalcommits"
+    },
+    "bootstrap": {
+      "npmClientArgs": ["--no-package-lock"],
+      "hoist": true,
+      "noCi": true,
+      "nohoist": [
+        "@memorable/**/typescript",
+        "@memorable/**/eslint",
+        "@memorable/**/jest"
+      ]
+    },
+    "clean": {
+      "yes": true,
+      "loglevel": "error"
+    }
+  },
+  "ignoreChanges": [
+    "**/CHANGELOG.md",
+    "**/node_modules/**",
+    "**/package.json",
+    "**/*.md",
+    "**/perf/**",
+    "**/test/**"
+  ],
+  "stream": true,
+  "concurrency": 4,
+  "loglevel": "info"
+}
