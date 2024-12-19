@@ -1,0 +1,159 @@
+# Kubernetes configuration for Memorable staging environment
+# Version: v1
+# Dependencies:
+# - kubernetes v1.25+
+# - kustomize v5.0+
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: memorable-staging-config
+  namespace: memorable-system
+  labels:
+    environment: staging
+    app: memorable
+    version: v1
+data:
+  # Environment Configuration
+  environment: staging
+  region: us-west-2
+  cluster_size: medium
+  high_availability: enabled
+
+  # Resource Quotas Configuration
+  resource_quotas: |
+    ai_service:
+      cpu: "4"
+      memory: "8Gi"
+      replicas: 2
+      storage: "20Gi"
+      ephemeral_storage: "5Gi"
+    auth_service:
+      cpu: "2"
+      memory: "4Gi"
+      replicas: 2
+      storage: "10Gi"
+      ephemeral_storage: "2Gi"
+    book_service:
+      cpu: "2"
+      memory: "4Gi"
+      replicas: 2
+      storage: "15Gi"
+      ephemeral_storage: "3Gi"
+    order_service:
+      cpu: "2"
+      memory: "4Gi"
+      replicas: 2
+      storage: "10Gi"
+      ephemeral_storage: "2Gi"
+    print_service:
+      cpu: "2"
+      memory: "4Gi"
+      replicas: 2
+      storage: "10Gi"
+      ephemeral_storage: "2Gi"
+
+  # Scaling Configuration
+  scaling_config: |
+    min_replicas: 2
+    max_replicas: 4
+    target_cpu_utilization: 70
+    target_memory_utilization: 80
+    scale_down_delay: "5m"
+    scale_up_delay: "2m"
+    stabilization_window: "3m"
+
+  # Monitoring Configuration
+  monitoring_config: |
+    metrics_retention: "15d"
+    log_retention: "30d"
+    trace_sampling_rate: 1.0
+    alert_channels:
+      - email
+      - slack
+    metrics_scrape_interval: "30s"
+    log_level: "debug"
+    health_check_interval: "30s"
+    alert_evaluation_interval: "1m"
+
+  # Security Configuration
+  security_config: |
+    network_policies: enabled
+    pod_security_policies: enabled
+    mtls: STRICT
+    rbac: enabled
+    secret_encryption: enabled
+    admission_controllers:
+      - PodSecurityPolicy
+      - LimitRanger
+
+  # Service Mesh Overrides
+  service_mesh_overrides: |
+    tracing:
+      sampling_rate: 1.0
+      enabled: true
+      max_traces_per_second: 100
+      trace_timeout: "30s"
+    rate_limits:
+      ai_service: "10/s"
+      auth_service: "100/s"
+      book_service: "50/s"
+      order_service: "30/s"
+      print_service: "20/s"
+    circuit_breakers:
+      max_connections: 100
+      max_pending_requests: 50
+      max_requests: 75
+      max_retries: 3
+
+---
+# Resource Quotas for Staging Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: memorable-staging-quota
+  namespace: memorable-system
+spec:
+  hard:
+    requests.cpu: "24"
+    requests.memory: "48Gi"
+    requests.storage: "100Gi"
+    limits.cpu: "32"
+    limits.memory: "64Gi"
+    pods: "50"
+    services: "20"
+    configmaps: "30"
+    secrets: "30"
+    persistentvolumeclaims: "20"
+
+---
+# Network Policy for Staging Environment
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: memorable-staging-network-policy
+  namespace: memorable-system
+spec:
+  podSelector:
+    matchLabels:
+      app: memorable
+      environment: staging
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: memorable
+              environment: staging
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: memorable
+              environment: staging
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
