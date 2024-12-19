@@ -1,0 +1,98 @@
+node_modules/
+**/node_modules/
+**/.npm/
+**/.yarn/
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+.pnpm-debug.log*
+
+# Development and Test Files
+tests/
+**/*.test.*
+**/*.spec.*
+**/coverage/
+**/jest.config.*
+**/__tests__/
+**/__mocks__/
+
+# Version Control
+.git/
+.gitignore
+**/.gitkeep
+
+# Environment and Secrets
+**/.env*
+**/*.key
+**/*.pem
+**/*credential*
+**/.ssh/
+**/secrets/
+
+# IDE and Editor Files
+**/.vscode/
+**/.idea/
+**/.sublime-*
+**/.atom/
+**/.eclipse/
+**/.settings/
+
+# Build and Compilation Artifacts
+**/dist/
+**/build/
+**/.cache/
+**/tsconfig.tsbuildinfo
+**/*.js.map
+**/*.d.ts
+
+# Documentation and Markdown
+**/*.md
+**/docs/
+**/README*
+**/CHANGELOG*
+**/LICENSE*
+
+# Logs and Debugging
+**/*.log
+**/logs/
+**/.debug/
+**/debug.log
+
+# System Files
+**/.DS_Store
+**/Thumbs.db
+**/*.swp
+**/*~
+
+# Configuration Files Not Needed in Production
+**/.editorconfig
+**/.eslintrc*
+**/.prettierrc*
+**/.babelrc*
+**/jest.config.*
+**/tsconfig.*
+**/.nycrc*
+
+# Temporary Files
+**/tmp/
+**/temp/
+**/*.tmp
+**/*.temp
+
+# Development Tools and Scripts
+**/nodemon.json
+**/.nodemonignore
+**/webpack.config.*
+**/rollup.config.*
+**/.husky/
+**/scripts/
+
+# Miscellaneous
+**/.dockerignore
+**/docker-compose*.yml
+**/*.example
+**/*.sample
+**/.htaccess
+**/Procfile
+**/.cfignore
+**/.gcloudignore
