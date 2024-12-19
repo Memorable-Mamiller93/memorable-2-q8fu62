@@ -1,0 +1,39 @@
+{
+  "watch": [
+    "services/*/src/**/*.ts",
+    "services/*/src/**/*.json",
+    "services/*/*.json",
+    "shared/**/*.ts",
+    "shared/**/*.json", 
+    "config/**/*.json",
+    "api/**/*.ts"
+  ],
+  "ext": "ts,json",
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    "**/__mocks__/**",
+    "**/dist",
+    "**/coverage",
+    "**/node_modules",
+    "**/.git",
+    "**/.DS_Store"
+  ],
+  "exec": "ts-node -r tsconfig-paths/register --files",
+  "delay": "1000",
+  "verbose": true,
+  "legacyWatch": true,
+  "env": {
+    "NODE_ENV": "development",
+    "TS_NODE_PROJECT": "./tsconfig.json"
+  },
+  "events": {
+    "start": "echo 'Nodemon starting...'",
+    "restart": "echo 'Nodemon restarting due to changes...'",
+    "crash": "echo 'Application crashed - waiting for file changes before restarting...'"
+  },
+  "restartable": "rs",
+  "colours": true,
+  "signal": "SIGTERM"
+}
