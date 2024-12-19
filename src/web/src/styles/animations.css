@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Animation System - Memorable Platform
+   Implements Material Design 3.0 motion principles with accessibility support
+   Version: 1.0.0
+   ========================================================================== */
+
+/* Import transition variables from variables.css */
+@import './variables.css';
+
+/* Global Animation Keyframes
+   ========================================================================== */
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200%;
+    opacity: var(--shimmer-opacity, 0.1);
+  }
+  100% {
+    background-position: 200%;
+    opacity: var(--shimmer-opacity, 0.2);
+  }
+}
+
+@keyframes themeTransition {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Animation Utility Classes
+   ========================================================================== */
+
+.rotate {
+  animation: rotate var(--transition-duration-normal) var(--transition-easing-standard) infinite;
+  will-change: transform;
+  transform-origin: center;
+  /* Add ARIA attributes for accessibility */
+  -webkit-animation: rotate var(--transition-duration-normal) var(--transition-easing-standard) infinite;
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-duration-normal) var(--transition-easing-decelerate) forwards;
+  will-change: opacity;
+  -webkit-animation: fadeIn var(--transition-duration-normal) var(--transition-easing-decelerate) forwards;
+}
+
+.slide-in {
+  animation: slideIn var(--transition-duration-normal) var(--transition-easing-standard) forwards;
+  will-change: transform, opacity;
+  -webkit-animation: slideIn var(--transition-duration-normal) var(--transition-easing-standard) forwards;
+}
+
+.pulse {
+  animation: pulse var(--transition-duration-slow) var(--transition-easing-standard) infinite;
+  will-change: transform;
+  -webkit-animation: pulse var(--transition-duration-slow) var(--transition-easing-standard) infinite;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--shimmer-color-start, transparent),
+    var(--shimmer-color-mid, rgba(255, 255, 255, 0.2)),
+    var(--shimmer-color-end, transparent)
+  );
+  background-size: 200% 100%;
+  animation: shimmer var(--transition-duration-slow) var(--transition-easing-standard) infinite;
+  will-change: background-position, opacity;
+  -webkit-animation: shimmer var(--transition-duration-slow) var(--transition-easing-standard) infinite;
+}
+
+.theme-transition {
+  animation: themeTransition var(--transition-duration-fast) var(--transition-easing-standard);
+  will-change: opacity;
+  -webkit-animation: themeTransition var(--transition-duration-fast) var(--transition-easing-standard);
+}
+
+/* Accessibility - Respect User Motion Preferences
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hardware Acceleration for Smooth Animations
+   ========================================================================== */
+.rotate,
+.fade-in,
+.slide-in,
+.pulse,
+.shimmer,
+.theme-transition {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Add ARIA attributes for animation states
+   Elements using these animations should include:
+   role="status" aria-live="polite" aria-atomic="true"
+   ========================================================================== */
+[class*='rotate'],
+[class*='shimmer'] {
+  /* These classes typically indicate loading states */
+  position: relative;
+}
+
+/* Theme-aware shimmer effect colors
+   Automatically adapts to light/dark mode through CSS variables
+   ========================================================================== */
+:root {
+  --shimmer-color-start: var(--color-surface);
+  --shimmer-color-mid: var(--color-interactive-hover);
+  --shimmer-color-end: var(--color-surface);
+}
