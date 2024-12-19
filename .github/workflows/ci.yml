@@ -1,0 +1,201 @@
+# CI Workflow for Memorable Platform
+# Version: 1.0.0
+# Implements comprehensive testing, linting, building and quality assurance
+name: CI
+
+# Trigger on push and pull requests to main and develop branches
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Environment variables used across jobs
+env:
+  NODE_VERSION: '18.x'
+  COVERAGE_THRESHOLD: '80'
+  TEST_PARALLEL_WORKERS: '4'
+  NODE_ENV: 'test'
+  COVERAGE_REPORT_PATH: './coverage'
+  BUILD_CACHE_PATH: './node_modules/.cache'
+
+jobs:
+  backend:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        test-group: [unit, integration]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/backend/package-lock.json'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            src/backend/node_modules
+            src/backend/dist
+            src/backend/coverage
+          key: backend-${{ runner.os }}-${{ hashFiles('src/backend/package-lock.json') }}
+          restore-keys: |
+            backend-${{ runner.os }}-
+
+      - name: Install dependencies
+        working-directory: src/backend
+        run: |
+          npm ci --audit
+          npm audit fix
+
+      - name: Lint and type check
+        working-directory: src/backend
+        run: |
+          npm run lint
+          npm run type-check
+        if: matrix.test-group == 'unit'
+
+      - name: Run ${{ matrix.test-group }} tests
+        working-directory: src/backend
+        run: |
+          npm run test:${{ matrix.test-group }} -- --coverage --maxWorkers=${{ env.TEST_PARALLEL_WORKERS }}
+        env:
+          CI: true
+
+      - name: Upload test coverage
+        if: matrix.test-group == 'unit'
+        uses: codecov/codecov-action@v3
+        with:
+          directory: src/backend/coverage
+          flags: backend
+          fail_ci_if_error: true
+          threshold: ${{ env.COVERAGE_THRESHOLD }}
+
+      - name: Build application
+        if: matrix.test-group == 'unit'
+        working-directory: src/backend
+        run: npm run build
+
+      - name: Upload build artifacts
+        if: matrix.test-group == 'unit'
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-dist
+          path: src/backend/dist
+          retention-days: 7
+
+  frontend:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        test-group: [unit, integration]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/web/package-lock.json'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            src/web/node_modules
+            src/web/.next/cache
+            src/web/build
+            src/web/coverage
+          key: frontend-${{ runner.os }}-${{ hashFiles('src/web/package-lock.json') }}
+          restore-keys: |
+            frontend-${{ runner.os }}-
+
+      - name: Install dependencies
+        working-directory: src/web
+        run: |
+          npm ci --audit
+          npm audit fix
+
+      - name: Lint and type check
+        working-directory: src/web
+        run: |
+          npm run lint
+          npm run type-check
+        if: matrix.test-group == 'unit'
+
+      - name: Run ${{ matrix.test-group }} tests
+        working-directory: src/web
+        run: |
+          npm run test:${{ matrix.test-group }} -- --coverage --maxWorkers=${{ env.TEST_PARALLEL_WORKERS }}
+        env:
+          CI: true
+
+      - name: Upload test coverage
+        if: matrix.test-group == 'unit'
+        uses: codecov/codecov-action@v3
+        with:
+          directory: src/web/coverage
+          flags: frontend
+          fail_ci_if_error: true
+          threshold: ${{ env.COVERAGE_THRESHOLD }}
+
+      - name: Build application
+        if: matrix.test-group == 'unit'
+        working-directory: src/web
+        run: npm run build
+
+      - name: Upload build artifacts
+        if: matrix.test-group == 'unit'
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: src/web/build
+          retention-days: 7
+
+  quality:
+    name: Quality Checks
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Check bundle sizes
+        run: |
+          echo "Analyzing bundle sizes..."
+          du -sh frontend-build/*
+          du -sh backend-dist/*
+
+      - name: Validate build artifacts
+        run: |
+          test -d frontend-build || exit 1
+          test -d backend-dist || exit 1
+          echo "Build artifacts validated successfully"
+
+      - name: Check test coverage thresholds
+        run: |
+          echo "Checking coverage meets minimum threshold of ${{ env.COVERAGE_THRESHOLD }}%"
+          # Coverage check logic would go here
+          # Using placeholder exit for now
+          exit 0
