@@ -1,0 +1,249 @@
+/* ==========================================================================
+   Component Styles - Memorable Platform
+   Implements Material Design 3.0 principles with enhanced accessibility
+   Version: 1.0.0
+   ========================================================================== */
+
+@import './variables.css';
+@import './theme.css';
+@import './animations.css';
+
+/* Button Components
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-md);
+  min-height: 44px;
+  min-width: 44px;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  text-decoration: none;
+  touch-action: manipulation;
+  transition: all var(--transition-duration-normal) var(--transition-easing-standard);
+  will-change: transform, box-shadow;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-text-on-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-text {
+  background-color: transparent;
+  color: var(--color-text-primary);
+  padding: var(--spacing-xs);
+}
+
+/* Button States */
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Input Components
+   ========================================================================== */
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-interactive-disabled);
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  transition: border-color var(--transition-duration-normal) var(--transition-easing-standard);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--color-text-secondary);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.input:disabled {
+  background-color: var(--color-interactive-disabled);
+  cursor: not-allowed;
+}
+
+/* Card Components
+   ========================================================================== */
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-duration-normal) var(--transition-easing-standard),
+              box-shadow var(--transition-duration-normal) var(--transition-easing-standard);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* Modal Components
+   ========================================================================== */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-overlay);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: var(--z-index-modal);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-overlay);
+  z-index: calc(var(--z-index-modal) - 1);
+}
+
+/* Tooltip Components
+   ========================================================================== */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-index-tooltip);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-duration-fast) var(--transition-easing-standard);
+}
+
+.tooltip:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 768px) {
+  .btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    min-height: 48px;
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .card {
+    padding: var(--spacing-md);
+    margin: var(--spacing-sm) 0;
+  }
+
+  .modal {
+    padding: var(--spacing-lg);
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+/* Accessibility - Reduced Motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .card,
+  .modal,
+  .tooltip {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Print Styles
+   ========================================================================== */
+@media print {
+  .btn {
+    display: none;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+
+  .modal,
+  .modal-overlay,
+  .tooltip {
+    display: none;
+  }
+}
+
+/* High Contrast Mode Support
+   ========================================================================== */
+@media (forced-colors: active) {
+  .btn,
+  .input,
+  .card {
+    border: 2px solid currentColor;
+  }
+
+  .btn:focus-visible,
+  .input:focus {
+    outline: 2px solid currentColor;
+  }
+}
