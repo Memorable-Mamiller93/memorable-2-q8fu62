@@ -1,0 +1,139 @@
+# Production Kustomization Configuration for Memorable Platform
+# Version: 1.0.0
+# Dependencies:
+# - kustomize v5.0.1
+# - kubernetes v1.25+
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Target namespace for all resources
+namespace: memorable-system
+
+# Base resources to be customized
+resources:
+- ../../base/namespace.yaml
+- ../../base/ingress.yaml
+- ../../base/service-mesh.yaml
+- ../../base/monitoring.yaml
+- ../../base/storage.yaml
+
+# Production-specific patches
+patches:
+# High Availability Configuration
+- path: patches/high-availability.yaml
+  target:
+    kind: Deployment
+    name: '.*'
+    
+# Resource Limits and Requests
+- path: patches/resource-limits.yaml
+  target:
+    kind: Deployment
+    name: '.*'
+    
+# Production Monitoring Configuration
+- path: patches/monitoring-prod.yaml
+  target:
+    kind: Prometheus
+    name: memorable-prometheus
+
+# ConfigMap Generators for Production Environment
+configMapGenerator:
+- name: prod-config
+  behavior: merge
+  files:
+  - config.yaml
+  literals:
+  - ENVIRONMENT=production
+  - LOG_LEVEL=info
+  - MONITORING_RETENTION=30d
+  - SCRAPE_INTERVAL=15s
+  - MIN_REPLICAS=3
+  - MAX_REPLICAS=10
+
+# Common Labels for all Resources
+commonLabels:
+  environment: production
+  managed-by: kustomize
+  version: v1.0.0
+
+# Common Annotations for all Resources
+commonAnnotations:
+  contact: "devops@memorable.com"
+  runbook: "https://wiki.memorable.com/runbooks/prod"
+  monitoring: "enabled"
+
+# Resource Transformers
+transformers:
+- |-
+  apiVersion: builtin
+  kind: NamespaceTransformer
+  metadata:
+    name: namespace-transformer
+  setRoleBindingSubjects: true
+
+# Replicas Configuration
+replicas:
+- name: web-frontend
+  count: 3
+- name: api-gateway
+  count: 3
+- name: ai-service
+  count: 3
+- name: book-service
+  count: 3
+- name: auth-service
+  count: 3
+- name: order-service
+  count: 3
+- name: print-service
+  count: 3
+
+# Images Configuration
+images:
+- name: memorable/web-frontend
+  newTag: stable
+- name: memorable/api-gateway
+  newTag: stable
+- name: memorable/ai-service
+  newTag: stable
+- name: memorable/book-service
+  newTag: stable
+- name: memorable/auth-service
+  newTag: stable
+- name: memorable/order-service
+  newTag: stable
+- name: memorable/print-service
+  newTag: stable
+
+# Vars for cross-resource references
+vars:
+- name: PROMETHEUS_SERVICE
+  objref:
+    kind: Service
+    name: memorable-prometheus
+    apiVersion: v1
+  fieldref:
+    fieldpath: metadata.name
+- name: GRAFANA_SERVICE
+  objref:
+    kind: Service
+    name: memorable-grafana
+    apiVersion: v1
+  fieldref:
+    fieldpath: metadata.name
+
+# Configuration for resource name prefixes
+namePrefix: prod-
+
+# Configuration for resource name suffixes
+nameSuffix: -v1
+
+# OpenAPI field validation
+openapi:
+  path: schema.json
+
+# Configurations for specific components
+configurations:
+- kustomizeconfig.yaml
