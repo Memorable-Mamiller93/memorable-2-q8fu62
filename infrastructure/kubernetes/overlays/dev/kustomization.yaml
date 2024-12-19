@@ -1,0 +1,153 @@
+# Kubernetes version: v1.25+
+# Kustomize version: v5.0+
+# Purpose: Development environment kustomization configuration for Memorable platform
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base resources to be customized
+resources:
+- ../../base/namespace.yaml
+- ../../base/ingress.yaml
+- ../../base/monitoring.yaml
+- ./config.yaml
+
+# Target namespace for all resources
+namespace: memorable-system
+
+# Resource patches for development environment
+patches:
+# Set development-appropriate resource limits for all deployments
+- target:
+    kind: Deployment
+    name: ".*"
+  patch: |
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          memory: "512Mi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "500m"
+
+# ConfigMap generators for environment-specific settings
+configMapGenerator:
+- name: memorable-dev-env
+  namespace: memorable-system
+  behavior: merge
+  literals:
+  - ENVIRONMENT=development
+  - LOG_LEVEL=debug
+  - ENABLE_DEBUG=true
+  - METRICS_RETENTION=7d
+  - TRACING_SAMPLE_RATE=1.0
+  - MONITORING_SCRAPE_INTERVAL=30s
+  - DEBUG_TOOLS_ENABLED=true
+  - RESOURCE_VALIDATION_ENABLED=true
+
+# Common labels for all resources
+commonLabels:
+  environment: development
+  managed-by: kustomize
+  app: memorable
+
+# Common annotations for all resources
+commonAnnotations:
+  environment.memorable.com/type: development
+  monitoring.memorable.com/enabled: "true"
+  debug.memorable.com/enabled: "true"
+
+# Namespace transformers
+namePrefix: dev-
+
+# Resource customizations
+patchesJson6902:
+# Customize monitoring retention and scrape intervals for development
+- target:
+    group: monitoring.coreos.com
+    version: v1
+    kind: Prometheus
+    name: memorable-prometheus
+  patch: |
+    - op: replace
+      path: /spec/retention
+      value: 7d
+    - op: replace
+      path: /spec/scrapeInterval
+      value: 30s
+
+# Development-specific resource quotas
+- target:
+    version: v1
+    kind: ResourceQuota
+    name: memorable-quota
+  patch: |
+    - op: replace
+      path: /spec/hard/cpu
+      value: "16"
+    - op: replace
+      path: /spec/hard/memory
+      value: "32Gi"
+
+# Configure development-appropriate replicas
+- target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: ".*"
+  patch: |
+    - op: replace
+      path: /spec/replicas
+      value: 1
+
+# Development security context
+- target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: ".*"
+  patch: |
+    - op: add
+      path: /spec/template/spec/containers/0/securityContext
+      value:
+        runAsNonRoot: true
+        runAsUser: 1000
+        allowPrivilegeEscalation: false
+
+# Development-specific liveness and readiness probes
+- target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: ".*"
+  patch: |
+    - op: add
+      path: /spec/template/spec/containers/0/livenessProbe
+      value:
+        httpGet:
+          path: /healthz
+          port: http
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 5
+    - op: add
+      path: /spec/template/spec/containers/0/readinessProbe
+      value:
+        httpGet:
+          path: /ready
+          port: http
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 3
+
+# Development-specific environment variables
+vars:
+- name: ENVIRONMENT
+  objref:
+    kind: ConfigMap
+    name: memorable-dev-env
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.ENVIRONMENT
