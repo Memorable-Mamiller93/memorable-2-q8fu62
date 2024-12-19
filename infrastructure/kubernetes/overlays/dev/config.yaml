@@ -1,0 +1,149 @@
+# Kubernetes version: v1.25+
+# Kustomize version: v5.0+
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: memorable-dev-config
+  namespace: memorable-system
+  labels:
+    app: memorable
+    env: development
+    component: config
+data:
+  # Environment identifier
+  environment: development
+
+  # Resource quotas for development services
+  resource_quotas: |
+    ai_service:
+      cpu: "4"
+      memory: "8Gi"
+      storage: "20Gi"
+      ephemeral-storage: "2Gi"
+    auth_service:
+      cpu: "1"
+      memory: "2Gi"
+      storage: "5Gi"
+      ephemeral-storage: "1Gi"
+    book_service:
+      cpu: "2"
+      memory: "4Gi"
+      storage: "10Gi"
+      ephemeral-storage: "1Gi"
+    order_service:
+      cpu: "1"
+      memory: "2Gi"
+      storage: "5Gi"
+      ephemeral-storage: "1Gi"
+    print_service:
+      cpu: "1"
+      memory: "2Gi"
+      storage: "5Gi"
+      ephemeral-storage: "1Gi"
+
+  # Scaling configuration for development
+  scaling_config: |
+    replicas:
+      min: 1
+      max: 2
+      default: 1
+    autoscaling:
+      cpu_threshold: "80%"
+      memory_threshold: "85%"
+      scale_up_delay: "3m"
+      scale_down_delay: "5m"
+
+  # Resource limit thresholds
+  resource_limits: |
+    cpu_threshold: "80%"
+    memory_threshold: "85%"
+    storage_threshold: "80%"
+    pod_eviction_threshold: "85%"
+
+  # Monitoring configuration
+  monitoring_config: |
+    metrics:
+      retention: "7d"
+      scrape_interval: "30s"
+      evaluation_interval: "1m"
+    logging:
+      level: "DEBUG"
+      retention: "7d"
+      json_format: true
+    tracing:
+      sampling_rate: 1.0
+      retention: "3d"
+      export_batch_size: 100
+    alerting:
+      error_threshold: "5%"
+      latency_threshold: "5s"
+      notification_channels:
+        - email
+        - slack
+      paging_threshold: "critical"
+
+  # Security settings for development
+  security_config: |
+    mtls: "PERMISSIVE"
+    network_policies: "ALLOW_ALL"
+    rbac: "enabled"
+    pod_security: "privileged"
+    service_account:
+      automount: true
+    encryption:
+      secrets: true
+      etcd: false
+
+  # Development-specific feature flags
+  feature_flags: |
+    debug_endpoints: true
+    verbose_logging: true
+    trace_all_requests: true
+    mock_external_services: false
+    hot_reload: enabled
+
+  # Development tools configuration
+  dev_tools: |
+    remote_debugging:
+      enabled: true
+      port_range: "30000-32767"
+    hot_reload:
+      enabled: true
+      watch_paths:
+        - "/app/src"
+        - "/app/config"
+    metrics_endpoints:
+      enabled: true
+      path: "/metrics"
+    health_probes:
+      startup_probe:
+        initial_delay: 30
+        period: 10
+      liveness_probe:
+        period: 30
+        timeout: 5
+      readiness_probe:
+        period: 10
+        timeout: 3
+
+  # Environment variables for development
+  env_vars: |
+    LOG_LEVEL: "debug"
+    TRACE_SAMPLING_RATIO: "1.0"
+    MOCK_SERVICES: "false"
+    DEV_MODE: "true"
+    CORS_ALLOW_ALL: "true"
+    API_TIMEOUT: "30s"
+    DB_MAX_CONNECTIONS: "10"
+    REDIS_MAX_CONNECTIONS: "5"
+
+  # Local development endpoints
+  endpoints: |
+    api_gateway: "http://api-gateway.memorable-system:8080"
+    auth_service: "http://auth-service.memorable-system:8081"
+    book_service: "http://book-service.memorable-system:8082"
+    ai_service: "http://ai-service.memorable-system:8083"
+    print_service: "http://print-service.memorable-system:8084"
+    order_service: "http://order-service.memorable-system:8085"
+    monitoring: "http://monitoring.memorable-system:9090"
