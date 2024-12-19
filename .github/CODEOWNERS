@@ -1,0 +1,46 @@
+# Ensures every file has at least one owner
+* @tech-leads
+
+# AI Service ownership
+# Story generation and illustration creation components
+src/backend/services/ai/** @ai-team-leads
+
+# Authentication Service ownership
+# User management and security components
+src/backend/services/auth/** @security-team-leads
+
+# Book Service ownership
+# Core book creation and management functionality
+src/backend/services/book/** @backend-team-leads
+
+# API Gateway ownership
+# Request routing and service orchestration
+src/backend/services/gateway/** @backend-team-leads
+
+# Order Service ownership
+# Payment and order processing
+src/backend/services/order/** @backend-team-leads
+
+# Print Service ownership
+# Print job management and coordination
+src/backend/services/print/** @backend-team-leads
+
+# Frontend Application ownership
+# User interface and interaction components
+src/web/** @frontend-team-leads
+
+# Infrastructure code ownership
+# Deployment and environment configuration
+infrastructure/** @devops-team-leads
+
+# CI/CD workflow ownership
+# Build and deployment automation
+.github/workflows/** @devops-team-leads
+
+# Backend test files ownership
+# Dual ownership for quality assurance
+src/backend/services/**/tests/** @qa-team-leads @backend-team-leads
+
+# Frontend test files ownership
+# Dual ownership for quality assurance
+src/web/tests/** @qa-team-leads @frontend-team-leads
