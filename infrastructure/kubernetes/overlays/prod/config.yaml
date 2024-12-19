@@ -1,0 +1,252 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: memorable-prod-config
+  namespace: memorable-system
+  labels:
+    environment: production
+    app: memorable
+
+data:
+  # Resource Quotas Configuration
+  resource-quotas.yaml: |
+    apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: memorable-prod-quotas
+    spec:
+      hard:
+        # AI Service Resources
+        ai-service.cpu: "8"
+        ai-service.memory: "16Gi"
+        ai-service.storage: "100Gi"
+        ai-service.pods: "4"
+        
+        # Auth Service Resources
+        auth-service.cpu: "2"
+        auth-service.memory: "4Gi"
+        auth-service.storage: "20Gi"
+        auth-service.pods: "3"
+        
+        # Book Service Resources
+        book-service.cpu: "4"
+        book-service.memory: "8Gi"
+        book-service.storage: "50Gi"
+        book-service.pods: "3"
+        
+        # Order Service Resources
+        order-service.cpu: "2"
+        order-service.memory: "4Gi"
+        order-service.storage: "20Gi"
+        order-service.pods: "3"
+        
+        # Print Service Resources
+        print-service.cpu: "2"
+        print-service.memory: "4Gi"
+        print-service.storage: "20Gi"
+        print-service.pods: "3"
+        
+        # Gateway Service Resources
+        gateway-service.cpu: "2"
+        gateway-service.memory: "4Gi"
+        gateway-service.storage: "10Gi"
+        gateway-service.pods: "4"
+
+  # Horizontal Pod Autoscaling Configuration
+  scaling-policies.yaml: |
+    apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: memorable-prod-hpa
+    spec:
+      scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+      minReplicas: 3
+      maxReplicas: 8
+      metrics:
+      - type: Resource
+        resource:
+          name: cpu
+          target:
+            type: Utilization
+            averageUtilization: 70
+      - type: Resource
+        resource:
+          name: memory
+          target:
+            type: Utilization
+            averageUtilization: 80
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+
+  # Security Policies Configuration
+  security-policies.yaml: |
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: memorable-prod-network-policy
+    spec:
+      podSelector:
+        matchLabels:
+          app: memorable
+      policyTypes:
+      - Ingress
+      - Egress
+      ingress:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              name: memorable-system
+        ports:
+        - protocol: TCP
+          port: 443
+      egress:
+      - to:
+        - namespaceSelector:
+            matchLabels:
+              name: memorable-system
+    ---
+    apiVersion: policy/v1beta1
+    kind: PodSecurityPolicy
+    metadata:
+      name: memorable-prod-psp
+    spec:
+      privileged: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      seLinux:
+        rule: RunAsAny
+      supplementalGroups:
+        rule: MustRunAs
+        ranges:
+        - min: 1
+          max: 65535
+      runAsUser:
+        rule: MustRunAsNonRoot
+      fsGroup:
+        rule: MustRunAs
+        ranges:
+        - min: 1
+          max: 65535
+      volumes:
+      - 'configMap'
+      - 'emptyDir'
+      - 'projected'
+      - 'secret'
+      - 'downwardAPI'
+      - 'persistentVolumeClaim'
+
+  # Service Mesh Configuration
+  service-mesh.yaml: |
+    apiVersion: security.istio.io/v1beta1
+    kind: PeerAuthentication
+    metadata:
+      name: memorable-prod-mtls
+    spec:
+      mtls:
+        mode: STRICT
+    ---
+    apiVersion: security.istio.io/v1beta1
+    kind: AuthorizationPolicy
+    metadata:
+      name: memorable-prod-auth
+    spec:
+      selector:
+        matchLabels:
+          app: memorable
+      rules:
+      - from:
+        - source:
+            principals: ["cluster.local/ns/memorable-system/*"]
+      - to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE"]
+
+  # Rate Limiting Configuration
+  rate-limits.yaml: |
+    apiVersion: networking.istio.io/v1alpha3
+    kind: EnvoyFilter
+    metadata:
+      name: memorable-prod-ratelimit
+    spec:
+      configPatches:
+      - applyTo: HTTP_FILTER
+        match:
+          context: SIDECAR_INBOUND
+        patch:
+          operation: INSERT_BEFORE
+          value:
+            name: envoy.filters.http.ratelimit
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
+              domain: memorable
+              rate_limit_service:
+                grpc_service:
+                  envoy_grpc:
+                    cluster_name: rate_limit_cluster
+                transport_api_version: V3
+
+  # Monitoring Configuration
+  monitoring-settings.yaml: |
+    apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: memorable-prod-alerts
+    spec:
+      groups:
+      - name: memorable.rules
+        rules:
+        - alert: HighCPUUsage
+          expr: container_cpu_usage_seconds_total > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            description: "Container CPU usage above 80% threshold"
+        - alert: HighMemoryUsage
+          expr: container_memory_usage_bytes > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            description: "Container memory usage above 85% threshold"
+        - alert: HighErrorRate
+          expr: rate(http_requests_total{status=~"5.*"}[5m]) > 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            description: "High error rate detected"
+        - alert: HighLatency
+          expr: http_request_duration_seconds > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            description: "API latency above 3 seconds threshold"
+
+  # Retention Configuration
+  retention-settings.yaml: |
+    metrics_retention_days: 30
+    logging_retention_days: 90
+    tracing_retention_days: 7
+
+  # Notification Channels
+  notification-channels.yaml: |
+    channels:
+      - name: email
+        type: email
+        config:
+          recipients: ["ops@memorable.com"]
+      - name: slack
+        type: slack
+        config:
+          channel: "#prod-alerts"
+      - name: pagerduty
+        type: pagerduty
+        config:
+          service_key: "${PAGERDUTY_SERVICE_KEY}"
