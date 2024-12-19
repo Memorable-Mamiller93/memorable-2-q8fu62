@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <!-- Primary Meta Tags -->
+    <title>Memorable - AI-Powered Personalized Children's Books</title>
+    <meta name="description" content="Create magical personalized children's books with AI-powered story generation and illustrations. Transform your loved ones into storybook characters.">
+    <meta name="theme-color" content="#6200EE">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.memorable.ai;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <!-- PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://api.memorable.ai">
+    
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="./src/styles/global.css">
+    <link rel="stylesheet" href="./src/styles/theme.css">
+    
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    <!-- Preload Critical Assets -->
+    <link rel="preload" as="image" href="/assets/logo.svg">
+    
+    <!-- Schema.org Markup -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Memorable",
+            "description": "AI-powered personalized children's book creation platform",
+            "url": "https://memorable.ai",
+            "applicationCategory": "ChildrensBooks",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#root" class="skip-link">Skip to main content</a>
+    
+    <!-- Initial loading state -->
+    <div id="initial-loader" role="progressbar" aria-label="Loading application" aria-hidden="true">
+        <div class="loading-spinner"></div>
+        <p>Loading Memorable...</p>
+    </div>
+    
+    <!-- React mount point -->
+    <div id="root" role="main" aria-live="polite"></div>
+    
+    <!-- No JavaScript fallback -->
+    <noscript>
+        <div class="noscript-message">
+            <h1>JavaScript Required</h1>
+            <p>You need to enable JavaScript to run this app. Please enable it to continue.</p>
+        </div>
+    </noscript>
+    
+    <!-- Main application script -->
+    <script type="module" src="./src/main.tsx"></script>
+</body>
+</html>
