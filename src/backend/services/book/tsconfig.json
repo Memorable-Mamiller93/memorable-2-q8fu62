@@ -1,0 +1,48 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true,
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "paths": {
+      "@book/*": ["./src/*"]
+    },
+    "lib": [
+      "es2022",
+      "esnext.asynciterable"
+    ],
+    "target": "es2022",
+    "module": "commonjs"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
+}
+```
+
+This TypeScript configuration file is specifically tailored for the book service while extending the root configuration. Here's a breakdown of the key configurations:
+
+1. Extends the root configuration to maintain consistent base settings:
+```json
+"extends": "../../tsconfig.json"
