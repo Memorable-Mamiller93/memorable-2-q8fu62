@@ -1,0 +1,116 @@
+# Kubernetes Ingress Configuration v1.25+
+# cert-manager v1.12+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: memorable-ingress
+  namespace: memorable-system
+  annotations:
+    # Ingress Controller Configuration
+    kubernetes.io/ingress.class: "nginx"
+    
+    # TLS/Certificate Management
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # Performance Optimizations
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "512k"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/keepalive-timeout: "60"
+    
+    # CORS Configuration
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://memorable.com"
+    
+    # Security Settings
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    nginx.ingress.kubernetes.io/modsecurity-snippet: |
+      SecRuleEngine On
+      SecRequestBodyAccess On
+    
+    # Rate Limiting
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-rpm: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "10"
+    
+    # DDoS Protection
+    nginx.ingress.kubernetes.io/server-snippet: |
+      limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
+      limit_conn_zone $binary_remote_addr zone=addr:10m;
+    
+    # Monitoring
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10254"
+
+spec:
+  tls:
+  - hosts:
+    - memorable.com
+    - api.memorable.com
+    secretName: memorable-tls-cert
+
+  rules:
+  # Web Frontend Rules
+  - host: memorable.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-frontend
+            port:
+              number: 80
+
+  # API Gateway Rules
+  - host: api.memorable.com
+    http:
+      paths:
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 3000
+
+---
+# Default Backend for 404 handling
+apiVersion: v1
+kind: Service
+metadata:
+  name: default-backend
+  namespace: memorable-system
+spec:
+  selector:
+    app: default-backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+
+---
+# Health Check Endpoint
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: health-check-ingress
+  namespace: memorable-system
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /healthz
+        pathType: Exact
+        backend:
+          service:
+            name: default-backend
+            port:
+              number: 80
