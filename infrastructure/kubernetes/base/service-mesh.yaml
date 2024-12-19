@@ -1,0 +1,210 @@
+# Service Mesh Configuration for Memorable Platform
+# Version: 1.0.0
+# Dependencies:
+# - istio: v1.19+
+# - kubernetes: v1.25+
+
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: memorable-mesh
+  namespace: memorable-system
+  labels:
+    app.kubernetes.io/name: memorable-mesh
+    app.kubernetes.io/part-of: memorable-platform
+    app.kubernetes.io/component: service-mesh
+spec:
+  profile: default
+  # Core mesh components configuration
+  components:
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2Gi
+          limits:
+            cpu: 1000m
+            memory: 4Gi
+        replicaCount: 2
+        hpaSpec:
+          minReplicas: 2
+          maxReplicas: 5
+          targetCPUUtilizationPercentage: 80
+
+  # Global mesh configuration
+  values:
+    global:
+      # mTLS configuration with TLS 1.3 enforcement
+      mtls:
+        enabled: true
+        mode: STRICT
+        autoUpgrade: true
+        minProtocolVersion: "TLSv1.3"
+        cipherSuites:
+          - ECDHE-ECDSA-AES256-GCM-SHA384
+          - ECDHE-RSA-AES256-GCM-SHA384
+
+      # Proxy configuration
+      proxy:
+        privileged: false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+    # Telemetry and monitoring configuration
+    telemetry:
+      enabled: true
+      v2:
+        enabled: true
+        prometheus:
+          enabled: true
+          configOverride:
+            scrapeInterval: 15s
+            retention: 15d
+            metrics:
+              - name: request_duration_ms
+              - name: request_size
+              - name: response_size
+              - name: error_rate
+              - name: circuit_breaker_opens
+              - name: retry_attempts
+
+        # Tracing configuration with Jaeger
+        tracing:
+          enabled: true
+          provider: jaeger
+          sampling: 100.0
+          customTags:
+            - service.name
+            - service.version
+            - environment
+          jaeger:
+            collector:
+              endpoint: jaeger-collector.memorable-monitoring:14250
+            query:
+              baseURL: http://jaeger-query:16686
+            storage:
+              type: elasticsearch
+
+    # Traffic management policies
+    pilot:
+      enabled: true
+      trafficManagement:
+        outboundTrafficPolicy: REGISTRY_ONLY
+        enableAutoMtls: true
+        localityLoadBalancing: true
+        circuitBreakers:
+          maxRequests: 1000
+          maxPendingRequests: 100
+          maxRetries: 3
+
+    # Security policies
+    security:
+      authorization:
+        mode: CUSTOM
+        jwtValidation: true
+        rbacEnabled: true
+        defaultDeny: true
+
+      # Rate limiting configuration per service
+      rateLimiting:
+        enabled: true
+        global:
+          rate: "100/s"
+        services:
+          ai_service:
+            rate: "5/s"
+            burst: "10"
+          auth_service:
+            rate: "50/s"
+            burst: "100"
+          book_service:
+            rate: "30/s"
+            burst: "60"
+          order_service:
+            rate: "20/s"
+            burst: "40"
+          print_service:
+            rate: "10/s"
+            burst: "20"
+
+      # Network policies
+      networkPolicies:
+        enabled: true
+        mode: REGISTRY_ONLY
+        ingressGatewayEnabled: true
+        egressGatewayEnabled: true
+        mtlsStrict: true
+
+    # Monitoring integration
+    monitoring:
+      grafana:
+        enabled: true
+        dashboards:
+          - service-health
+          - security-metrics
+          - performance-metrics
+        autoProvision: true
+        service:
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "3000"
+
+      prometheus:
+        enabled: true
+        scrapeInterval: 15s
+        retention: 15d
+        alertRules:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+          selector:
+            release: memorable
+
+      jaeger:
+        enabled: true
+        collector:
+          enabled: true
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+        query:
+          enabled: true
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+        agent:
+          enabled: true
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+    # Sidecar injection configuration
+    sidecarInjectorWebhook:
+      enabled: true
+      rewriteAppHTTPProbe: true
+      templates:
+        default: |
+          policy:
+            authentication:
+              mtls:
+                mode: STRICT
+            outboundTrafficPolicy:
+              mode: REGISTRY_ONLY
