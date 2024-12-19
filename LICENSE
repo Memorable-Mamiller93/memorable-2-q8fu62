@@ -1,0 +1,81 @@
+MIT License with Additional Terms for AI-Powered Children's Book Creation Platform
+
+Copyright (c) 2024 Memorable Platform
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Additional Terms:
+
+1. AI-Generated Content
+   a. Content generated through OpenAI's services is subject to OpenAI's terms of
+      service and usage guidelines (https://openai.com/policies/terms-of-use).
+   b. Illustrations created via Stable Diffusion are subject to the CreativeML
+      Open RAIL-M license terms (https://huggingface.co/spaces/CompVis/stable-diffusion-license).
+   c. Users retain rights to their personalized story content while granting
+      Memorable Platform necessary licenses to process and generate books.
+
+2. Third-Party Acknowledgments
+   This software integrates with and relies upon various third-party services:
+   - OpenAI API (Commercial License)
+   - Stable Diffusion (CreativeML Open RAIL-M)
+   - Print Network Services (Commercial Agreements)
+   - Various open-source packages under MIT-compatible licenses
+
+3. User Content and Privacy
+   a. Users retain ownership of all personal content uploaded to the platform.
+   b. The platform is granted limited rights to process, store, and print
+      user-provided content solely for book creation purposes.
+   c. All user data handling must comply with GDPR, CCPA, and COPPA requirements.
+
+4. Print Rights and Distribution
+   a. Physical book printing rights are limited to authorized print network partners.
+   b. Digital preview and proof copies are for personal use only.
+   c. Commercial redistribution of generated books requires explicit authorization.
+
+5. Geographic Restrictions
+   Initial service coverage is limited to North America and Western Europe.
+   Additional regions may be covered under separate terms.
+
+6. Modifications and Derivatives
+   Any modifications to the core platform must:
+   a. Maintain compatibility with all third-party service terms
+   b. Preserve all privacy and data protection measures
+   c. Comply with AI ethical guidelines and content restrictions
+   d. Maintain print quality standards and specifications
+
+7. Ethical AI Usage
+   Platform usage must adhere to ethical AI principles including:
+   a. Prevention of harmful or discriminatory content generation
+   b. Protection of minor's privacy and interests
+   c. Transparency in AI-generated content identification
+   d. Responsible content filtering and moderation
+
+8. Warranty and Liability
+   In addition to MIT License limitations:
+   a. No warranties are provided for AI-generated content accuracy
+   b. Print quality is subject to partner network capabilities
+   c. Service availability depends on third-party API accessibility
+
+For questions about licensing terms or compliance requirements, contact:
+legal@memorable-platform.com
+
+This license is subject to annual review and may be updated to reflect changes
+in AI technology, privacy regulations, and service offerings.
+
+Last Updated: January 2024
