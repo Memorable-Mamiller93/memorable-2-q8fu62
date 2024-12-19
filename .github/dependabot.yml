@@ -1,0 +1,92 @@
+version: 2
+updates:
+  # Frontend dependency updates configuration
+  - package-ecosystem: "npm"
+    directory: "/src/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    versioning-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "security"
+    reviewers:
+      - "CODEOWNERS"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+        exclude-patterns:
+          - "react-scripts"
+      mui:
+        patterns:
+          - "@mui/*"
+          - "@emotion/*"
+      testing:
+        patterns:
+          - "@testing-library/*"
+          - "jest*"
+    security-updates-only: false
+    open-pull-requests-limit: 10
+
+  # Backend dependency updates configuration
+  - package-ecosystem: "npm"
+    directory: "/src/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    versioning-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "backend"
+      - "security"
+    reviewers:
+      - "CODEOWNERS"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "@typescript-eslint/*"
+      testing:
+        patterns:
+          - "jest*"
+          - "@types/jest"
+          - "supertest"
+      express:
+        patterns:
+          - "express*"
+          - "@types/express*"
+    security-updates-only: false
+    open-pull-requests-limit: 10
+
+  # Infrastructure dependency updates configuration
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure/terraform"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    labels:
+      - "dependencies"
+      - "infrastructure"
+      - "security"
+    reviewers:
+      - "CODEOWNERS"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    open-pull-requests-limit: 5
