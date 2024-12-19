@@ -1,0 +1,97 @@
+# Kubernetes v1.25+
+# Base namespace configuration for Memorable platform microservices
+# Implements strict isolation, security policies, and monitoring integration
+
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: memorable-system
+    labels:
+      istio-injection: enabled
+      monitoring: enabled
+      security.istio.io/tlsMode: STRICT
+      pod-security.kubernetes.io/enforce: restricted
+    annotations:
+      network-policies.kubernetes.io/isolated: "true"
+      quota.kubernetes.io/enabled: "true"
+
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: memorable-ai
+    labels:
+      istio-injection: enabled
+      monitoring: enabled
+      security.istio.io/tlsMode: STRICT
+      pod-security.kubernetes.io/enforce: restricted
+    annotations:
+      network-policies.kubernetes.io/isolated: "true"
+      quota.kubernetes.io/enabled: "true"
+
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: memorable-auth
+    labels:
+      istio-injection: enabled
+      monitoring: enabled
+      security.istio.io/tlsMode: STRICT
+      pod-security.kubernetes.io/enforce: restricted
+    annotations:
+      network-policies.kubernetes.io/isolated: "true"
+      quota.kubernetes.io/enabled: "true"
+
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: memorable-book
+    labels:
+      istio-injection: enabled
+      monitoring: enabled
+      security.istio.io/tlsMode: STRICT
+      pod-security.kubernetes.io/enforce: restricted
+    annotations:
+      network-policies.kubernetes.io/isolated: "true"
+      quota.kubernetes.io/enabled: "true"
+
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: memorable-order
+    labels:
+      istio-injection: enabled
+      monitoring: enabled
+      security.istio.io/tlsMode: STRICT
+      pod-security.kubernetes.io/enforce: restricted
+    annotations:
+      network-policies.kubernetes.io/isolated: "true"
+      quota.kubernetes.io/enabled: "true"
+
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: memorable-print
+    labels:
+      istio-injection: enabled
+      monitoring: enabled
+      security.istio.io/tlsMode: STRICT
+      pod-security.kubernetes.io/enforce: restricted
+    annotations:
+      network-policies.kubernetes.io/isolated: "true"
+      quota.kubernetes.io/enabled: "true"
+
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: memorable-monitoring
+    labels:
+      istio-injection: enabled
+      monitoring: enabled
+      security.istio.io/tlsMode: STRICT
+      pod-security.kubernetes.io/enforce: restricted
+    annotations:
+      network-policies.kubernetes.io/isolated: "true"
+      quota.kubernetes.io/enabled: "true"
