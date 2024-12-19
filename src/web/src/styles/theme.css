@@ -1,0 +1,172 @@
+/* ==========================================================================
+   Theme System - Memorable Platform
+   Implements Material Design 3.0 principles with comprehensive theme management
+   Version: 1.0.0
+   ========================================================================== */
+
+@import './variables.css';
+
+/* Root Theme Configuration
+   ========================================================================== */
+:root {
+  color-scheme: light dark;
+  accent-color: var(--color-primary);
+  scroll-behavior: smooth;
+}
+
+/* Base Theme Styles
+   ========================================================================== */
+.theme-base {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-primary);
+  line-height: var(--line-height-normal);
+  transition: background-color var(--transition-duration-normal) var(--transition-easing-standard),
+              color var(--transition-duration-normal) var(--transition-easing-standard);
+}
+
+/* Theme Variants
+   ========================================================================== */
+.theme-magical {
+  --theme-primary: var(--color-primary);
+  --theme-secondary: var(--color-secondary);
+  background: var(--color-background);
+  color-scheme: var(--color-primary);
+  font-family: var(--font-family-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-duration-normal) var(--transition-easing-standard);
+  will-change: transform, opacity;
+  outline-offset: 2px;
+  outline-color: var(--theme-primary);
+}
+
+.theme-adventure {
+  --theme-primary: var(--color-secondary);
+  --theme-secondary: var(--color-primary-variant);
+  background: var(--color-surface);
+  color-scheme: var(--color-secondary);
+  font-family: var(--font-family-secondary);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-duration-fast) var(--transition-easing-standard);
+  will-change: transform, opacity;
+  outline-offset: 2px;
+  outline-color: var(--theme-primary);
+}
+
+.theme-educational {
+  --theme-primary: var(--color-primary-variant);
+  --theme-secondary: var(--color-secondary-variant);
+  background: var(--color-background);
+  color-scheme: var(--color-primary-variant);
+  font-family: var(--font-family-primary);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-duration-normal) var(--transition-easing-standard);
+  will-change: transform, opacity;
+  outline-offset: 2px;
+  outline-color: var(--theme-primary);
+}
+
+/* Theme Interaction States
+   ========================================================================== */
+@media (hover: hover) {
+  .theme-magical:hover,
+  .theme-adventure:hover,
+  .theme-educational:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .theme-magical:focus-visible,
+  .theme-adventure:focus-visible,
+  .theme-educational:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 4px;
+  }
+
+  .theme-magical:active,
+  .theme-adventure:active,
+  .theme-educational:active {
+    transform: translateY(1px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Dark Mode Adaptations
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  .theme-magical {
+    background: var(--color-surface);
+    color-scheme: var(--color-primary-variant);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .theme-adventure {
+    background: var(--color-background);
+    color-scheme: var(--color-secondary-variant);
+    box-shadow: var(--shadow-md);
+  }
+
+  .theme-educational {
+    background: var(--color-surface);
+    color-scheme: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Accessibility - Reduced Motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .theme-magical,
+  .theme-adventure,
+  .theme-educational {
+    transition: none;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* Responsive Adaptations
+   ========================================================================== */
+@media (max-width: var(--breakpoint-sm)) {
+  .theme-magical,
+  .theme-adventure,
+  .theme-educational {
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-duration-fast);
+  }
+}
+
+/* High Contrast Mode Support
+   ========================================================================== */
+@media (forced-colors: active) {
+  .theme-magical,
+  .theme-adventure,
+  .theme-educational {
+    border: 2px solid currentColor;
+    box-shadow: none;
+  }
+
+  .theme-magical:hover,
+  .theme-adventure:hover,
+  .theme-educational:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Print Optimizations
+   ========================================================================== */
+@media print {
+  .theme-magical,
+  .theme-adventure,
+  .theme-educational {
+    background: none;
+    color: black;
+    box-shadow: none;
+    border: 1px solid black;
+  }
+}
