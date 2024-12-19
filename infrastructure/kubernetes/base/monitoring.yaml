@@ -1,0 +1,252 @@
+# Monitoring stack configuration for Memorable platform
+# Version: 1.0
+# Dependencies:
+# - prometheus-operator v0.68+
+# - grafana v9.5+
+# - jaeger-operator v1.47+
+# - elasticsearch-operator v2.8+
+# - kubernetes v1.25+
+
+---
+# Prometheus Operator Configuration
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: memorable-prometheus
+  namespace: memorable-monitoring
+  labels:
+    app: memorable
+    component: monitoring
+spec:
+  replicas: 2
+  retention: 30d
+  scrapeInterval: 15s
+  evaluationInterval: 15s
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
+  securityContext:
+    fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: fast
+        resources:
+          requests:
+            storage: 100Gi
+  serviceMonitorSelector:
+    matchLabels:
+      app: memorable
+  additionalScrapeConfigs:
+    name: additional-scrape-configs
+    key: prometheus-additional.yaml
+
+---
+# Grafana Configuration
+apiVersion: integreatly.org/v1alpha1
+kind: Grafana
+metadata:
+  name: memorable-grafana
+  namespace: memorable-monitoring
+spec:
+  deployment:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: grafana
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 1Gi
+                limits:
+                  cpu: 500m
+                  memory: 2Gi
+  dashboardLabelSelector:
+    - matchExpressions:
+        - key: app
+          operator: In
+          values:
+            - memorable
+  config:
+    auth:
+      disable_login_form: false
+    security:
+      admin_user: admin
+      admin_password: ${GRAFANA_ADMIN_PASSWORD}
+    dashboards:
+      default_home_dashboard_path: /etc/grafana/dashboards/overview.json
+
+---
+# Jaeger Operator Configuration
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: memorable-jaeger
+  namespace: memorable-monitoring
+spec:
+  strategy: production
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        server-urls: http://elasticsearch:9200
+        index-prefix: memorable-traces
+  ingress:
+    enabled: true
+    security: oauth-proxy
+  sampling:
+    type: probabilistic
+    param: 1.0
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+---
+# Elasticsearch Configuration
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: memorable-elasticsearch
+  namespace: memorable-monitoring
+spec:
+  version: 7.17.0
+  nodeSets:
+    - name: default
+      count: 3
+      config:
+        node.store.allow_mmap: false
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              resources:
+                requests:
+                  cpu: 1000m
+                  memory: 4Gi
+                limits:
+                  cpu: 2000m
+                  memory: 8Gi
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: false
+
+---
+# AlertManager Configuration
+apiVersion: monitoring.coreos.com/v1
+kind: AlertmanagerConfig
+metadata:
+  name: memorable-alertmanager-config
+  namespace: memorable-monitoring
+spec:
+  route:
+    receiver: 'default-receiver'
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+    routes:
+      - receiver: 'critical-alerts'
+        matchers:
+          - name: severity
+            value: critical
+        group_wait: 10s
+      - receiver: 'warning-alerts'
+        matchers:
+          - name: severity
+            value: warning
+  receivers:
+    - name: 'default-receiver'
+      pagerdutyConfigs:
+        - serviceKey:
+            name: pagerduty-key
+            key: serviceKey
+    - name: 'critical-alerts'
+      pagerdutyConfigs:
+        - serviceKey:
+            name: pagerduty-critical-key
+            key: serviceKey
+    - name: 'warning-alerts'
+      slackConfigs:
+        - apiURL:
+            name: slack-webhook
+            key: url
+          channel: '#monitoring-alerts'
+
+---
+# Custom Metrics Configuration
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: memorable-custom-metrics
+  namespace: memorable-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: memorable
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: 'story_generation_time|illustration_generation_time|print_job_duration|ai_service_latency|book_creation_time|user_conversion_rate|payment_processing_time|image_processing_time|printer_network_latency|content_delivery_time'
+          action: keep
+
+---
+# PrometheusRule for Alert Definitions
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: memorable-alert-rules
+  namespace: memorable-monitoring
+spec:
+  groups:
+    - name: ai-performance
+      rules:
+        - alert: StoryGenerationSlowdown
+          expr: story_generation_time > 30
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Story generation time exceeding threshold
+        - alert: IllustrationGenerationSlowdown
+          expr: illustration_generation_time > 45
+          for: 5m
+          labels:
+            severity: warning
+    - name: business-metrics
+      rules:
+        - alert: LowConversionRate
+          expr: user_conversion_rate < 20
+          for: 1h
+          labels:
+            severity: warning
+        - alert: HighErrorRate
+          expr: error_rate > 1
+          for: 5m
+          labels:
+            severity: critical
+    - name: system-performance
+      rules:
+        - alert: HighCPUUsage
+          expr: cpu_usage > 80
+          for: 15m
+          labels:
+            severity: warning
+        - alert: HighMemoryUsage
+          expr: memory_usage > 85
+          for: 15m
+          labels:
+            severity: warning
