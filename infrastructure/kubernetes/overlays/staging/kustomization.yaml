@@ -1,0 +1,156 @@
+# Kubernetes Kustomization Configuration for Staging Environment
+# Version: 1.0.0
+# Dependencies:
+# - kustomize: v5.0+
+# - kubernetes: v1.25+
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base resources to be customized
+resources:
+- ../../base/namespace.yaml
+- ../../base/ingress.yaml
+- ../../base/monitoring.yaml
+- ../../base/service-mesh.yaml
+- ../../base/storage.yaml
+
+# Target namespace for all resources
+namespace: memorable-system
+
+# ConfigMap generation for staging-specific configurations
+configMapGenerator:
+- name: staging-config
+  behavior: merge
+  literals:
+  - ENVIRONMENT=staging
+  - LOG_LEVEL=debug
+  - MONITORING_RETENTION=7d
+  - TRACING_SAMPLE_RATE=1.0
+
+# Resource customizations for staging environment
+patches:
+# Ingress configuration patches
+- target:
+    kind: Ingress
+    name: memorable-ingress
+  patch: |-
+    - op: replace
+      path: /spec/tls/0/hosts/0
+      value: staging.memorable.com
+    - op: replace
+      path: /metadata/annotations/nginx.ingress.kubernetes.io/cors-allow-origin
+      value: https://staging.memorable.com
+    - op: replace
+      path: /metadata/annotations/nginx.ingress.kubernetes.io/limit-rps
+      value: "20"
+
+# Monitoring configuration patches
+- target:
+    kind: Prometheus
+    name: memorable-prometheus
+  patch: |-
+    - op: replace
+      path: /spec/retention
+      value: 7d
+    - op: replace
+      path: /spec/resources/requests/cpu
+      value: 500m
+    - op: replace
+      path: /spec/resources/requests/memory
+      value: 2Gi
+
+# Service replicas and resource configurations
+replicas:
+- name: web-frontend
+  count: 2
+- name: api-gateway
+  count: 2
+- name: ai-service
+  count: 2
+- name: auth-service
+  count: 2
+- name: book-service
+  count: 2
+- name: order-service
+  count: 2
+- name: print-service
+  count: 2
+
+# Resource configurations
+commonAnnotations:
+  environment: staging
+  monitoring.memorable.com/scrape: "true"
+  security.memorable.com/policy: restricted
+
+commonLabels:
+  env: staging
+  managed-by: kustomize
+
+# Resource limits and requests
+patches:
+- target:
+    kind: Deployment
+    labelSelector: "app.kubernetes.io/part-of=memorable"
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 1000m
+          memory: 2Gi
+
+# Security configurations
+patchesStrategicMerge:
+- |-
+  apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: default-deny
+  spec:
+    podSelector: {}
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: memorable-system
+    egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: memorable-system
+
+# Storage configurations
+- |-
+  apiVersion: storage.k8s.io/v1
+  kind: StorageClass
+  metadata:
+    name: memorable-standard
+  parameters:
+    type: gp3
+    iopsPerGB: "3000"
+    encrypted: "true"
+
+# Service mesh configurations
+- |-
+  apiVersion: install.istio.io/v1alpha1
+  kind: IstioOperator
+  metadata:
+    name: memorable-mesh
+  spec:
+    values:
+      global:
+        proxy:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
